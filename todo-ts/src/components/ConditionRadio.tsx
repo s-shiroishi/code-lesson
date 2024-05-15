@@ -14,20 +14,22 @@ const ConditionRadio: React.VFC<Props> = ({ condition, setCondition, name, value
         setCondition(e.target.value);
     };
 
-    const selectColor = (value: string) => {
-        if (value === '全て') {
-            return 'hover:text-purple-700';
-        } else if (value == '未完了') {
-            return 'hover:text-red-700';
-        } else if (value === '完了') {
-            return 'hover:text-green-700';
-        }
-    }
+    type colorListObjType = {
+        '全て': string[];
+        '未完了': string[];
+        '完了': string[];
+    };
+
+    const colorListObj: colorListObjType = {
+        '全て': ['all-radio', 'hover:text-purple-700'],
+        '未完了': ['incomp-radio', 'hover:text-red-700'],
+        '完了': ['comp-radio', 'hover:text-green-700']
+    };
 
     return (
         <label className="mr-2 text-xs font-bold">
-            <input type="radio" name={name} value={value} className={className} onChange={filterHandler} checked={condition === value} />
-            <span className={selectColor(value)}>{value}</span>
+            <input type="radio" name={name} value={value} className={`radio-common ${colorListObj[value as keyof colorListObjType][0]}`} onChange={filterHandler} checked={condition === value} />
+            <span className={colorListObj[value as keyof colorListObjType][1]}>{value}</span>
         </label>
     );
 };
