@@ -1,3 +1,4 @@
+// 親コンポーネントのフォルダを作成してそこに配置する
 import React, { useState } from "react";
 import { Task } from '../types/Task';
 
@@ -10,8 +11,11 @@ type Props = {
 
 const TaskView: React.VFC<Props> = ({ setTaskList, task, editButtonText, deleteButtonText }) => {
 
+    // こちらの命名は taskForm とかの方が良いですね。
     const [userInput, setUserInput] = useState<string>(task.taskName);
 
+    // 下記の三つのメソッドについてですが引数は不要です。プロパティで受け取っている task の id を使用しましょう。
+    // LocalStorageのデータを使用するのは好ましくないですね、素直に親コンポーネントからTaskListをもらって来ましょう。
     const conditionHandler = (e: React.MouseEvent<HTMLInputElement, MouseEvent>) => {
         const prevTasksString = localStorage.getItem('tasks');
         if (prevTasksString) {
