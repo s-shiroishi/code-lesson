@@ -18,7 +18,7 @@ const AddTask: React.FC<Props> = ({ taskList, setTaskList, setCondition, inputPl
         const newTask: Task = { taskId: uuid(), taskName: userInput, completed: false };
         const newTaskList = [...taskList, newTask];
         localStorage.setItem('tasks', JSON.stringify(newTaskList));
-        setCondition('未完了');
+        setCondition('未完了'); // 親コンポーネントでメソッド作った方が可読性UP（useReducerで定義してもOK）
         setTaskList(newTaskList);
         setUserInput('');
     }
