@@ -19,6 +19,9 @@ const App: React.VFC = () => {
   const [taskList, setTaskList] = useState<Task[]>([]);
   const [condition, setCondition] = useState<string>('未完了');
 
+  // こちらメソッドではなく viewTask という useState にして、
+  // taskList と condition を第二引数とした useEffect の中で
+  // setViewTask に代入する形で行った方が自然です。
   const viewTask = () => {
     // switch 文に方が見やすい
     if (condition === '全て') {
@@ -29,6 +32,13 @@ const App: React.VFC = () => {
       return taskList.filter((task: Task) => task.completed !== true);
     }
     return [];
+
+    // だいぶスッキリしました。可読性もいい感じです。
+    // return taskList.filter((task: Task) => {
+    //   if (condition === '全て') return true;  
+    //   if (condition === '完了') return task.completed;
+    //   if (condition === '未完了') return !task.completed;
+    // });
   };
 
   // stateが実行されてからこちらが実行されるため、
