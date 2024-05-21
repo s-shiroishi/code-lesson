@@ -1,75 +1,74 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useReducer } from 'react';
+import { v4 as uuid } from 'uuid';
 import AppTitle from './components/AppTitle';
 import AddTask from './components/AddTask';
-import TaskListView from './components/TaskListView';
-import FilterTask from "./components/FilterTask";
+import TaskListView from './components/TaskListView/TaskListView';
+import FilterTask from "./components/FilterTask/FilterTask";
 import { Task } from './types/Task';
+import { Action } from './types/Action';
 
-const App: React.VFC = () => {
+const App: React.FC = () => {
 
-  // localStrage からの初期化は useEffect ではなく useState に関数を作って渡す
-  // const initTask = () => {
-  //   const tasksString = localStorage.getItem('tasks');
-  //   if (tasksString) {
-  //     return JSON.parse(tasksString);
-  //   }
-  //   return []
-  // }
-  
-  const [taskList, setTaskList] = useState<Task[]>([]);
-  const [condition, setCondition] = useState<string>('未完了');
-
-  // こちらメソッドではなく viewTask という useState にして、
-  // taskList と condition を第二引数とした useEffect の中で
-  // setViewTask に代入する形で行った方が自然です。
-  const viewTask = () => {
-    // switch 文に方が見やすい
-    if (condition === '全て') {
-      return taskList;
-    } else if (condition === '完了') {
-      return taskList.filter((task: Task) => task.completed === true); // boolean の比較はいらない
-    } else if (condition === '未完了') {
-      return taskList.filter((task: Task) => task.completed !== true);
-    }
-    return [];
-
-    // だいぶスッキリしました。可読性もいい感じです。
-    // return taskList.filter((task: Task) => {
-    //   if (condition === '全て') return true;  
-    //   if (condition === '完了') return task.completed;
-    //   if (condition === '未完了') return !task.completed;
-    // });
-  };
-
-  // stateが実行されてからこちらが実行されるため、
-  // taskList が画面際読み込みのたびに[]になってしまうので
-  // initTask を useState に渡す方法に変える
-  useEffect(() => {
+  const initTask = (): Task[] => {
     const tasksString = localStorage.getItem('tasks');
     if (tasksString) {
-      const tasks = JSON.parse(tasksString);
-      setTaskList(tasks);
+      return JSON.parse(tasksString);
     };
-  }, []);
-
-  // ローカルストレージの処理は一箇所にまとめる
-  // useEffect(() => {
-  //   localStorage.setItem('tasks', JSON.stringify(taskList));
-  // }, [taskList]);
-
-  const resetHandler = () => {
-    localStorage.clear(); // 全てClearしてしまうので removeItem を使用
-    setTaskList([]);
+    return [];
   };
+
+  const taskListReducer = (taskListState: Task[], action: Action): Task[] => {
+    switch (action.type) {
+      case 'addTask':{ 
+        const newTask: Task = { taskId: uuid(), taskName: action.payload as string, completed: false };
+        return [...taskListState, newTask];
+      }
+      case 'editTaskName':{
+        const newTaskList = taskListState.map((task: Task) => task.taskId === (action.payload as Task).taskId ? { ...(action.payload as Task), taskName: (action.payload as Task).taskName } : task);
+        return newTaskList;
+      }
+      case 'deleteTask': {
+        const newTaskList = taskListState.filter((task: Task) =>task.taskId !== (action.payload as Task).taskId);
+        return newTaskList;
+      }
+      case 'changeTaskCondition':{
+        const newTaskList = taskListState.map((task: Task) => task.taskId === (action.payload as Task).taskId ? { ...(action.payload as Task), completed: !(action.payload as Task).completed } : task);
+        return [...newTaskList];
+      }
+      case 'resetTask':
+        return [];
+      default:
+        return taskListState;
+      };
+  };
+
+  const [taskList, taskListDispatch] = useReducer<React.Reducer<Task[], Action>>(taskListReducer, initTask());
+  const [viewTask, setViewTask] = useState<Task[]>(taskList);
+  const [condition, setCondition] = useState<string>('全て');
+  
+  useEffect(() => {
+    const newViewTask = () => {
+      return taskList.filter((task: Task) => {
+        if (condition === '全て') return true;
+        if (condition === '完了') return task.completed;
+        if (condition === '未完了') return !task.completed;
+      });
+    };
+    setViewTask(newViewTask);
+  }, [taskList, condition]);
+
+  useEffect(() => {
+    localStorage.setItem('tasks', JSON.stringify(taskList));
+  }, [taskList]);
 
   return (
     <div className='h-full flex justify-center items-center bg-indigo-950 '>
       <div className='relative container mx-auto h-5/6 w-2/6 py-4 flex flex-col items-center text-gray-400'>
         <AppTitle title='Todo App' />
-        <AddTask taskList={taskList} setTaskList={setTaskList} setCondition={setCondition} inputPlaceholder='タスクを入力してください' addButtonText='追加' />
+        <AddTask taskListDispatch={taskListDispatch} inputPlaceholder='タスクを入力してください' addButtonText='追加' />
         <FilterTask condition={condition} setCondition={setCondition} />
-        <TaskListView viewTask={viewTask} setTaskList={setTaskList} />
-        {taskList.length > 0 && <button className="absolute bottom-0 right-0 text-xs font-bold hover:text-gray-200" onClick={resetHandler}>全て削除</button>}
+        <TaskListView viewTask={viewTask} taskListDispatch={taskListDispatch} />
+        {taskList.length > 0 && <button className="absolute bottom-0 right-0 text-xs font-bold hover:text-gray-200" onClick={() => taskListDispatch({type: 'resetTask'})}>全て削除</button>}
       </div>
     </div>
   );
