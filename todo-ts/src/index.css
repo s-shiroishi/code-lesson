@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+.checkbox-common {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid #ccc;
+  padding: 5px;
+  border-radius: 3px;
+  display: inline-block;
+  position: relative;
+}
+
+.comp-checkbox {
+  background-color: #198111;
+}
+
+.incomp-checkbox {
+  background-color: rgb(143, 20, 20);
+}
+
+.radio-common {
+  width: 10px;
+  height: 10px;
+  margin-right: 2px;
+}
+
+.all-radio {
+  accent-color: rgb(119, 20, 142);
+}
+
+.incomp-radio {
+  accent-color: rgb(143, 20, 20);
+}
+
+.comp-radio {
+  accent-color: #198111;
+}
