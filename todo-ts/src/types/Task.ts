@@ -1,5 +1,5 @@
 export type Task = {
-    taskId: string;
-    taskName: string;
-    completed: boolean;
+    id: number;
+    name: string | null;
+    completed: boolean | null;
 };

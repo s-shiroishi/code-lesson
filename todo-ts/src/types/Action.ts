@@ -2,5 +2,5 @@ import { Task } from "./Task";
 
 export type Action = {
   type?: string;
-  payload?: string | Task;
+  payload?: string | Task | Task[];
 };
